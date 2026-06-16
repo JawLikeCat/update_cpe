@@ -40,6 +40,14 @@ class DeviceUpgrader:
         log_callback: Optional[Callable[[str], None]] = None,
         version_name: str = "",
         download_wait: int = 180,
+        var_a: str = "",
+        var_b: str = "",
+        var_c: str = "",
+        var_d: str = "",
+        var_a_inc: bool = False,
+        var_b_inc: bool = False,
+        var_c_inc: bool = False,
+        var_d_inc: bool = False,
     ):
         self.jump_host = jump_host
         self.jump_port = jump_port
@@ -49,6 +57,16 @@ class DeviceUpgrader:
         self.log_callback = log_callback
         self.version_name = version_name
         self.download_wait = download_wait
+        # 变量参数
+        self.var_a = var_a
+        self.var_b = var_b
+        self.var_c = var_c
+        self.var_d = var_d
+        # 变量递增标志
+        self.var_a_inc = var_a_inc
+        self.var_b_inc = var_b_inc
+        self.var_c_inc = var_c_inc
+        self.var_d_inc = var_d_inc
 
     def _log(self, message: str):
         if self.log_callback:
@@ -101,6 +119,10 @@ class DeviceUpgrader:
             variables = {
                 "device_ip": ip,
                 "jump_host": self.jump_host,
+                "a": self.var_a,
+                "b": self.var_b,
+                "c": self.var_c,
+                "d": self.var_d,
             }
             
             # 如果版本名称不为空，添加到变量中
@@ -233,4 +255,17 @@ class DeviceUpgrader:
             if stop_on_error and not result.success:
                 self._log("遇到错误，停止后续设备升级")
                 break
+            # 设备升级完成后，对勾选自增的变量进行加1操作
+            self._increment_variables()
         return results
+    
+    def _increment_variables(self):
+        """对勾选自增的变量进行加1操作。"""
+        if self.var_a_inc and self.var_a.isdigit():
+            self.var_a = str(int(self.var_a) + 1)
+        if self.var_b_inc and self.var_b.isdigit():
+            self.var_b = str(int(self.var_b) + 1)
+        if self.var_c_inc and self.var_c.isdigit():
+            self.var_c = str(int(self.var_c) + 1)
+        if self.var_d_inc and self.var_d.isdigit():
+            self.var_d = str(int(self.var_d) + 1)

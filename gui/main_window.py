@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
+    QGridLayout,
     QGroupBox,
     QLabel,
     QLineEdit,
@@ -20,6 +21,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QSpinBox,
+    QCheckBox,
     QAction,
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -45,6 +47,14 @@ class UpgradeWorker(QThread):
         devices: List[Dict[str, str]],
         version_name: str = "",
         download_wait: int = 180,
+        var_a: str = "",
+        var_b: str = "",
+        var_c: str = "",
+        var_d: str = "",
+        var_a_inc: bool = False,
+        var_b_inc: bool = False,
+        var_c_inc: bool = False,
+        var_d_inc: bool = False,
     ):
         super().__init__()
         self.jump_host = jump_host
@@ -55,6 +65,14 @@ class UpgradeWorker(QThread):
         self.devices = devices
         self.version_name = version_name
         self.download_wait = download_wait
+        self.var_a = var_a
+        self.var_b = var_b
+        self.var_c = var_c
+        self.var_d = var_d
+        self.var_a_inc = var_a_inc
+        self.var_b_inc = var_b_inc
+        self.var_c_inc = var_c_inc
+        self.var_d_inc = var_d_inc
 
     def run(self):
         upgrader = DeviceUpgrader(
@@ -66,6 +84,14 @@ class UpgradeWorker(QThread):
             version_name=self.version_name,
             download_wait=self.download_wait,
             log_callback=lambda msg: self.log_signal.emit(msg),
+            var_a=self.var_a,
+            var_b=self.var_b,
+            var_c=self.var_c,
+            var_d=self.var_d,
+            var_a_inc=self.var_a_inc,
+            var_b_inc=self.var_b_inc,
+            var_c_inc=self.var_c_inc,
+            var_d_inc=self.var_d_inc,
         )
         results = upgrader.upgrade_all(
             self.devices,
@@ -153,6 +179,42 @@ class MainWindow(QMainWindow):
         version_group.setLayout(version_layout)
         main_layout.addWidget(version_group)
 
+        # 变量参数控制区域
+        var_group = QGroupBox("变量参数控制")
+        var_layout = QGridLayout()
+        
+        # 变量输入
+        self.var_a_input = QLineEdit()
+        self.var_a_input.setPlaceholderText("变量 a 的值")
+        self.var_b_input = QLineEdit()
+        self.var_b_input.setPlaceholderText("变量 b 的值")
+        self.var_c_input = QLineEdit()
+        self.var_c_input.setPlaceholderText("变量 c 的值")
+        self.var_d_input = QLineEdit()
+        self.var_d_input.setPlaceholderText("变量 d 的值")
+        
+        # 变量递增选项
+        self.var_a_inc = QCheckBox("a 自增")
+        self.var_b_inc = QCheckBox("b 自增")
+        self.var_c_inc = QCheckBox("c 自增")
+        self.var_d_inc = QCheckBox("d 自增")
+        
+        var_layout.addWidget(QLabel("变量 a:"), 0, 0)
+        var_layout.addWidget(self.var_a_input, 0, 1)
+        var_layout.addWidget(self.var_a_inc, 0, 2)
+        var_layout.addWidget(QLabel("变量 b:"), 1, 0)
+        var_layout.addWidget(self.var_b_input, 1, 1)
+        var_layout.addWidget(self.var_b_inc, 1, 2)
+        var_layout.addWidget(QLabel("变量 c:"), 2, 0)
+        var_layout.addWidget(self.var_c_input, 2, 1)
+        var_layout.addWidget(self.var_c_inc, 2, 2)
+        var_layout.addWidget(QLabel("变量 d:"), 3, 0)
+        var_layout.addWidget(self.var_d_input, 3, 1)
+        var_layout.addWidget(self.var_d_inc, 3, 2)
+        
+        var_group.setLayout(var_layout)
+        main_layout.addWidget(var_group)
+
         # CPE命令执行输入区域
         cmd_group = QGroupBox("CPE命令执行输入")
         cmd_layout = QVBoxLayout()
@@ -163,11 +225,11 @@ class MainWindow(QMainWindow):
             "copy ftp aliftpraisecom aliftpraisecom 101.201.54.165 {version_name} image\n"
             "reboot\n\n"
             "【说明】\n"
-            "可用变量: {device_ip}, {jump_host}, {version_name}\n"
+            "可用变量: {device_ip}, {jump_host}, {version_name}, {a}, {b}, {c}, {d}\n"
             "{version_name} 会被界面上的版本名称替换\n"
+            "{a}, {b}, {c}, {d} 会被上方变量参数替换，勾选自增选项后每执行完一个设备，对应变量自动加1\n"
             "copy ftp 命令会自动使用界面上设置的下载等待时间\n"
             "如果留空且设置了版本名称，默认执行下载命令 + reboot（自动确认）\n"
-            "如果留空且未设置版本名称，仅执行 show version 测试连通性\n"
             "特殊指令: WAIT <秒数>  例如 WAIT 180 表示执行后等待 3 分钟"
         )
         self.cmd_text.setMaximumHeight(180)
@@ -315,6 +377,14 @@ class MainWindow(QMainWindow):
             devices=self.devices,
             version_name=self.version_name_input.text().strip(),
             download_wait=self.download_wait_spin.value(),
+            var_a=self.var_a_input.text().strip(),
+            var_b=self.var_b_input.text().strip(),
+            var_c=self.var_c_input.text().strip(),
+            var_d=self.var_d_input.text().strip(),
+            var_a_inc=self.var_a_inc.isChecked(),
+            var_b_inc=self.var_b_inc.isChecked(),
+            var_c_inc=self.var_c_inc.isChecked(),
+            var_d_inc=self.var_d_inc.isChecked(),
         )
         self.worker.log_signal.connect(self._log)
         self.worker.progress_signal.connect(self.progress_bar.setValue)

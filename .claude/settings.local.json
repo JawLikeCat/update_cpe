@@ -2,7 +2,22 @@
   "permissions": {
     "allow": [
       "Bash(git *)",
-      "Bash(ssh-keygen *)"
+      "Bash(ssh-keygen *)",
+      "Bash(gh *)",
+      "Bash(winget --version)",
+      "Bash(scoop --version)",
+      "Bash(choco --version)",
+      "Bash(curl --version)",
+      "Bash('uname -m')",
+      "Bash(curl -s https://api.github.com/repos/cli/cli/releases/latest)",
+      "Bash(sed -E 's/.*\"\\([^\"]+\\)\".*/\\\\1/')",
+      "Bash(cd /tmp)",
+      "Bash(curl -L -o gh.zip \"https://github.com/cli/cli/releases/download/v2.94.0/gh_2.94.0_windows_amd64.zip\")",
+      "Bash(powershell -Command \"Get-Command winget\")",
+      "Read(//c/Program Files/GitHub CLI/**)",
+      "Read(//c/Program Files \\(x86\\)/GitHub CLI/**)",
+      "Read(//c/Users/Administrator/AppData/Local/GitHub CLI/**)",
+      "Read(//c//**)"
     ]
   }
 }
